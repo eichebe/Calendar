@@ -1,9 +1,17 @@
+//import { openModal, saveInput } from '/.event.js';
+
 const date = new Date();
 
 const init = () => {
     date.setDate(1);
 
 const monthDays = document.querySelector(".days");
+monthDays.addEventListener("click", (event) => {
+  if (event.target.classList.contains("prev-date") || event.target.classList.contains("next-date")) {
+    return;
+  }
+  //openModal(event.target.innerText);
+});
 
 const indexFirstDay = date.getDay();
 
@@ -35,6 +43,7 @@ const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 const emptyCells = 7 - (indexLastDay + lastDay) % 7;
 const nextDays = emptyCells > 0 ? emptyCells : 7;
 
+//document.getElementById("saveButton").addEventListener("click", saveInput);
 document.getElementById("currentYear").innerText = date.getFullYear();
 document.getElementById("currentMonthDate").innerText = months[date.getMonth()];
 document.getElementById("dateToday").innerText = new Date().toDateString();
@@ -43,17 +52,17 @@ let days = "";
 
 //Prev Month Days
 for(let x = indexFirstDay; x > 0; x--){
-    days+=`<div class"prev-date">${prevLastDay - x +1}</div>`
+    days+=`<div class="prev-date">${prevLastDay - x +1}</div>`
 }
 
-//CUrrent Month Days
+//Current Month Days
 for (let i = 1; i <= lastDay; i++){
     //Today
     if( i === new Date().getDate() && date.getMonth() === new Date().getMonth()){
         days += `<div class="today">${i}</div>`;
     }else{
-        days+=`<div>${i}</div>`; 
-        monthDays.innerHTML = days;
+        days+=`<div id="${i}">${i}</div>`; 
+        monthDays.innerHTML += days;
     }
     
 }
@@ -63,6 +72,9 @@ for (let i = 1; i <= lastDay; i++){
         days += `<div class="next-date">${j}</div>`;
         monthDays.innerHTML = days;
     }
+    
+   
+
 };
 
     //Button prev Month

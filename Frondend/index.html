@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar</title>
     <link rel="stylesheet" href="/Frondend/styles.css">
-    <link href='https://css.gg/chevron-double-right-r.css' rel='stylesheet'>
-    <link href='https://css.gg/chevron-double-left-r.css' rel='stylesheet'>
+    <link href='https://css.gg/chevron-left.css' rel='stylesheet'>
+    <link href='https://css.gg/chevron-right.css' rel='stylesheet'>
     
     
 </head>
@@ -15,12 +15,12 @@
     <div class="container">
         <div class="calendar">
           <div class="month">
-            <i id="prevMonth" class="gg-chevron-double-left-r"></i>
+            <i id="prevMonth" class="gg-chevron-left"></i>
             <div class="date">
               <h1 id="currentMonthDate"></h1><h1 id="currentYear"></h1>
               <p id="dateToday"></p>
             </div>
-            <i id="nextMonth" class="gg-chevron-double-right-r"></i>
+            <i id="nextMonth" class="gg-chevron-right"></i>
           </div>
           <div class="weekdays">
             <div>Sun</div>
@@ -34,6 +34,31 @@
           <div class="days"></div>
         </div>
       </div>
+   
+<div id="modal" class="modal">
+  
+  <div class="modal-content">
+  
+    <div class="modal-header">
+      <h2>Add Event</h2>
+      <span class="close-button">&times;</span>
+    </div>
+  
+    <div class="modal-body">
+  
+      <form>
+        <label for="event-title">Event Title:</label><br>
+        <input type="text" id="event-title"><br>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button id="save-button">Save</button>
+      <button id="cancel-button">Cancel</button>
+    </div>
+  </div>
+</div>
+
   
       <script src="script.js"></script>
 </body>

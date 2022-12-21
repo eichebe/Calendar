@@ -20,10 +20,9 @@ html {
 }
 
 .calendar {
-  width: 45rem;
-  height: 52rem;
+  width: 100%;
+  height: 100%;
   background-color: #222227;
-  box-shadow: 0 0.5rem 3rem rgba(0, 0, 0, 0.4);
 }
 
 .month {
@@ -35,7 +34,6 @@ html {
   align-items: center;
   padding: 0 2rem;
   text-align: center;
-  text-shadow: 0 0.3rem 0.5rem rgba(0, 0, 0, 0.5);
 }
 
 .month i {
@@ -67,15 +65,14 @@ html {
   font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: 0.1rem;
-  width: calc(44.2rem / 7);
+  width: calc(100% / 7);
   display: flex;
   justify-content: center;
   align-items: center;
-  text-shadow: 0 0.3rem 0.5rem rgba(0, 0, 0, 0.5);
 }
 
 .days {
-  width: 100%;
+  width: 90%;
   display: flex;
   flex-wrap: wrap;
   padding: 0.2rem;
@@ -84,13 +81,11 @@ html {
 .days div {
   font-size: 1.4rem;
   margin: 0.3rem;
-  width: calc(40.2rem / 7);
+  width: calc(90%/ 7);
   height: 5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  text-shadow: 0 0.3rem 0.5rem rgba(0, 0, 0, 0.5);
-  transition: background-color 0.2s;
 }
 
 .days div:hover:not(.today) {
@@ -99,7 +94,9 @@ html {
   cursor: pointer;
 }
 
-.prev-date,
+.prev-date{
+  opacity: 0.5;
+}
 .next-date {
   opacity: 0.5;
 }
@@ -107,3 +104,89 @@ html {
 .today {
   background-color: #167e56;
 }
+/* The modal element */
+.modal {
+  /* Style the modal element */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal content */
+.modal-content {
+  /* Style the modal content */
+  position: relative;
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  width: 80%;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s
+}
+
+/* Modal header */
+.modal-header {
+  /* Style the modal header */
+  padding: 15px;
+  background-color: #5cb85c;
+  color: white;
+}
+
+/* Close button */
+.close-button {
+  /* Style the close button */
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Close button hover effect */
+.close-button:hover,
+.close-button:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Modal body */
+.modal-body {
+  /* Style the modal body */
+  padding: 15px;
+}
+
+/* Modal footer */
+.modal-footer {
+  /* Style the modal footer */
+  padding: 15px;
+  background-color: #5cb85c;
+  color: white;
+  text-align: right;
+}
+
+/* Animate the modal */
+@-webkit-keyframes animatetop {
+  from {top: -300px; opacity: 0} 
+  to {top: 0; opacity: 1}
+}
+
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
+
+
+
+
+
+ 
+
