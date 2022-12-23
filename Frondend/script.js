@@ -1,21 +1,29 @@
-//import { openModal, saveInput } from '/.event.js';
-
+//import { openModal} from '/.event.js';
+let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 const date = new Date();
+const newEventModal = document.getElementById("modal");
+const eventForDay = events.find(e => e.date === clicked);
+let clicked = null;
 
-const init = () => {
-    date.setDate(1);
-
-const monthDays = document.querySelector(".days");
-monthDays.addEventListener("click", (event) => {
-  if (event.target.classList.contains("prev-date") || event.target.classList.contains("next-date")) {
-    return;
+function openModal(date){
+    clicked = date;
+   
+  if (eventForDay) {
+    document.getElementById("eventText").innerText = eventForDay.title;
+    deleteEventModal.style.display = "block";
+  } else {
+    newEventModal.style.display = "block";
   }
-  //openModal(event.target.innerText);
-});
+  }
+
+function init () {
+    date.setDate(1);
 
 const indexFirstDay = date.getDay();
 
 const indexLastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDay();
+
+const monthDays = document.querySelector(".days");
 
 
 
@@ -35,6 +43,7 @@ const months = [
     ];
 
 const currentMonth = date.getMonth();
+console.log(currentMonth);
 
 const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 const prevLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
@@ -60,11 +69,20 @@ for (let i = 1; i <= lastDay; i++){
     //Today
     if( i === new Date().getDate() && date.getMonth() === new Date().getMonth()){
         days += `<div class="today">${i}</div>`;
+        if(eventForDay) {
+            const eventDiv = document.createElement("div");
+            eventDiv.classList.add("event");
+            eventDiv.innerText = eventForDay.title;
+            monthDays.appendChild(eventDiv);   
+        }
+       
     }else{
-        days+=`<div id="${i}">${i}</div>`; 
-        monthDays.innerHTML += days;
+   
+    days+=`<div id="${i}">${i}</div>`; 
+
+    monthDays.innerHTML= days;
     }
-    
+    monthDays.addEventListener("click", () => openModal(days));
 }
 
     //Days of next Month
@@ -79,7 +97,6 @@ for (let i = 1; i <= lastDay; i++){
 
     //Button prev Month
     document.getElementById("prevMonth").addEventListener("click", () => {
-        date.setMonth(date.getMonth() - 1);
         if (date.getMonth() === 0) {
             date.setFullYear(date.getFullYear() - 1);
             date.setMonth(11);
@@ -91,8 +108,7 @@ for (let i = 1; i <= lastDay; i++){
     
     //Button next Month
     document.getElementById("nextMonth").addEventListener("click", () => {
-        date.setMonth(date.getMonth() + 1);
-        if (date.getMonth() === 11) {
+        if (date.getMonth() === 12) {
             date.setFullYear(date.getFullYear() + 1);
             date.setMonth(0);
           } else {
@@ -101,5 +117,8 @@ for (let i = 1; i <= lastDay; i++){
         init();
     });
 
-
+    function initButtons() {
+        document.getElementById("modal").addEventListener("click", openModal);
+    }
+initButtons();
 init();
