@@ -1,9 +1,12 @@
 //import { openModal} from '/.event.js';
+let clicked = null;
 let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 const date = new Date();
+const deleteEventModal = document.getElementById("deleteEventModal");
+const eventTitleInput = document.getElementById("eventTitleInput");
 const newEventModal = document.getElementById("modal");
 const eventForDay = events.find(e => e.date === clicked);
-let clicked = null;
+
 
 function openModal(date){
     clicked = date;
@@ -68,7 +71,7 @@ for(let x = indexFirstDay; x > 0; x--){
 for (let i = 1; i <= lastDay; i++){
     //Today
     if( i === new Date().getDate() && date.getMonth() === new Date().getMonth()){
-        days += `<div class="today">${i}</div>`;
+        days += `<div class="thisMonthDays" id="today">${i}</div>`;
         if(eventForDay) {
             const eventDiv = document.createElement("div");
             eventDiv.classList.add("event");
@@ -78,7 +81,7 @@ for (let i = 1; i <= lastDay; i++){
        
     }else{
    
-    days+=`<div id="${i}">${i}</div>`; 
+    days+=`<div class="thisMonthDays" id="${i}">${i}</div>`; 
 
     monthDays.innerHTML= days;
     }
@@ -90,7 +93,16 @@ for (let i = 1; i <= lastDay; i++){
         days += `<div class="next-date">${j}</div>`;
         monthDays.innerHTML = days;
     }
-    
+    const thisMonthDaysElements = document.getElementsByClassName("thisMonthDays");
+
+    for (let i = 0; i < thisMonthDaysElements.length; i++) {
+      thisMonthDaysElements[i].addEventListener("click", (event) => {
+        // Your event listener code goes here
+        const clickedElement = event.target;
+        const date = clickedElement.innerText;
+        openModal(date);
+      });
+    }    
    
 
 };
@@ -116,9 +128,43 @@ for (let i = 1; i <= lastDay; i++){
           }
         init();
     });
-
-    function initButtons() {
-        document.getElementById("modal").addEventListener("click", openModal);
-    }
+    function closeModal() {
+    
+      newEventModal.style.display = "none";
+      deleteEventModal.style.display = "none";
+      eventTitleInput.value = "";
+      clicked = null;
+      load();
+  }
+  
+  function saveEvent() {
+      if (eventTitleInput.value) {
+          events.push({
+              date: clicked,
+              title: eventTitleInput.value,
+          });
+  
+      localStorage.setItem("events", JSON.stringify(events));
+      
+      closeModal();
+      
+  }
+  }
+  
+  function deleteEvent() {
+      
+      events = events.filter(e => e.date !== clicked);
+      
+      localStorage.setItem("events", JSON.stringify(events));
+      closeModal();
+  }
+    function initButtons () {
+    
+      document.getElementById("save-button").addEventListener("click", saveEvent);
+      document.getElementById("cancel-button").addEventListener("click", closeModal);
+  
+      document.getElementById("deleteButton").addEventListener("click", deleteEvent);
+      document.getElementById("closeButton").addEventListener("click", closeModal);
+  }
 initButtons();
 init();

@@ -101,7 +101,7 @@ html {
   opacity: 0.5;
 }
 
-.today {
+#today {
   background-color: #167e56;
 }
 .modal {
