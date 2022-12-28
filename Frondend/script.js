@@ -3,7 +3,7 @@ let clicked = null;
 let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 const date = new Date();
 const deleteEventModal = document.getElementById("deleteEventModal");
-const eventTitleInput = document.getElementById("eventTitleInput");
+const eventTitleInput = document.getElementById("event-title");
 const newEventModal = document.getElementById("modal");
 const eventForDay = events.find(e => e.date === clicked);
 
@@ -46,11 +46,11 @@ const months = [
     ];
 
 const currentMonth = date.getMonth();
-console.log(currentMonth);
-
+const currentYear = date.getFullYear();
 const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 const prevLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
 
 const emptyCells = 7 - (indexLastDay + lastDay) % 7;
 const nextDays = emptyCells > 0 ? emptyCells : 7;
@@ -85,7 +85,6 @@ for (let i = 1; i <= lastDay; i++){
 
     monthDays.innerHTML= days;
     }
-    monthDays.addEventListener("click", () => openModal(days));
 }
 
     //Days of next Month
@@ -98,11 +97,25 @@ for (let i = 1; i <= lastDay; i++){
     for (let i = 0; i < thisMonthDaysElements.length; i++) {
       thisMonthDaysElements[i].addEventListener("click", (event) => {
         // Your event listener code goes here
+        
         const clickedElement = event.target;
-        const date = clickedElement.innerText;
+        let date = clickedElement.innerText;
+        date = date + "/" + currentMonth + "/" + currentYear;
+        console.log(date);
         openModal(date);
+        
+        const eventForDay = events.find(e => e.date === clicked);
+        
+        if (eventForDay) {
+          const daySquare = document.getElementById(`${i}`);
+          const eventDiv = document.createElement("div");
+          eventDiv.classList.add("event");
+          eventDiv.innerText = eventForDay.title;
+          daySquare.appendChild(eventDiv);
+      }
       });
-    }    
+    }
+  
    
 
 };
@@ -134,7 +147,7 @@ for (let i = 1; i <= lastDay; i++){
       deleteEventModal.style.display = "none";
       eventTitleInput.value = "";
       clicked = null;
-      load();
+      init();
   }
   
   function saveEvent() {
