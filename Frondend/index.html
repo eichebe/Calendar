@@ -23,15 +23,15 @@
             <i id="nextMonth" class="gg-chevron-right"></i>
           </div>
           <div class="weekdays">
-            <div>Sun</div>
             <div>Mon</div>
             <div>Tue</div>
             <div>Wed</div>
             <div>Thu</div>
             <div>Fri</div>
             <div>Sat</div>
+            <div>Sun</div>
           </div>
-          <div class="days"></div>
+          <div id="calendar" class="days"></div>
         </div>
       </div>
    
@@ -56,17 +56,19 @@
     </div>
   </div>
 </div>
-
-<div id="deleteEventModal">
-  <h2>Event</h2>
-
-  <p id="eventText"></p>
-
-  <button id="deleteButton">Delete</button>
-  <button id="closeButton">Close</button>
-</div>
-
+<div id="deleteEventModal" class="modal">
   
+  <div class="modal-content">
+  
+    <div class="modal-header">
+      <h2><p id="eventText"></p></h2>
+    </div>
+  
+    <div class="modal-body">
+      <button id="deleteButton">Delete</button>
+      <button id="closeButton">Close</button>
+    </div>
+
       <script src="script.js"></script>
 </body>
 </html>

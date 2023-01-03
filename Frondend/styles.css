@@ -27,7 +27,7 @@ html {
 
 .month {
   width: 100%;
-  height: 12rem;
+  height: 15%;
   background-color: #167e56;
   display: flex;
   justify-content: space-between;
@@ -55,8 +55,7 @@ html {
 
 .weekdays {
   width: 100%;
-  height: 5rem;
-  padding: 0 0.4rem;
+  height: 5%;
   display: flex;
   align-items: center;
 }
@@ -72,80 +71,130 @@ html {
 }
 
 .days {
-  width: 90%;
+  width: 100%;
+  height:80%;
   display: flex;
   flex-wrap: wrap;
-  padding: 0.2rem;
 }
-
 .days div {
   font-size: 1.4rem;
-  margin: 0.3rem;
-  width: calc(90%/ 7);
-  height: 5rem;
+  width: calc(100%/ 7);
+  height: calc(100%/7);
   display: flex;
   justify-content: center;
   align-items: center;
 }
+.day{
+  width: 80%;
+  height: 80%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.event{
+  font-size: 10px;
+  width: auto;
+  background-color: #167e56;
+  position: absolute;
+  top: calc(60% + 5px);
+  border-radius: 4px;
+  padding: 5px;
+}
+
+
 
 .days div:hover{
   background-color: #262626;
   border: 0.2rem solid #777;
   cursor: pointer;
 }
-
-.prev-date{
-  opacity: 0.5;
+#today .event {
+  background-color: #222227;
 }
-.next-date {
-  opacity: 0.5;
+
+.prevDate{
+  opacity: 0.3;
+}
+.nextDate {
+  opacity: 0.3;
 }
 
 #today {
   background-color: #167e56;
 }
-.modal {
+.modal{
   display: none;
-  position: fixed;
-  left: calc(80%/2);
-  top: calc(80%/2);
-  width: 30%;
-  height: 30%;
+  z-index: 20;
+  padding: 25px;
+  background-color: #167e56;
+  box-shadow: 0px 0px 3px black;
+  border-radius: 5px;
+  width: 350px;
+  top: 100px;
+  left: calc(50% - 175px);
+  position: absolute;
+  font-family: sans-serif;
+  text-align: center;
+  justify-content: center;
 }
 
-/* Modal content */
+
 .modal-content {
-  /* Style the modal content */
   position: relative;
-  background-color: #222227;
+  color: black;
   margin: auto;
   width: 100%;
-  
 }
 
-/* Modal header */
+
 .modal-header {
-  /* Style the modal header */
   padding: 15px;
   background-color: #167e56;
   color: white;
 }
 
-/* Modal body */
+
 .modal-body {
-  /* Style the modal body */
   padding: 15px;
+  color: #12121f;
 }
 
-/* Modal footer */
 .modal-footer {
-  /* Style the modal footer */
   padding: 15px;
   background-color: #167e56;
   color: white;
-  text-align: right;
+  text-align: center;
 }
 
+
+
+#deleteEventModal {
+  display: none;
+  z-index: 20;
+  padding: 25px;
+  background-color: #167e56;
+  box-shadow: 0px 0px 3px black;
+  border-radius: 5px;
+  width: 350px;
+  top: 100px;
+  left: calc(50% - 175px);
+  position: absolute;
+  font-family: sans-serif;
+  text-align: center;
+}
+#cancel-button, #deleteButton {
+  background-color: #d36c6c;
+}
+#save-button, #closeButton {
+  background-color: #37e2a1;
+}
+#eventText {
+  font-size: 18px;
+}
 
 
 
