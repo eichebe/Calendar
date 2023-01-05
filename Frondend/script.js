@@ -6,31 +6,81 @@ const deleteEventModal = document.getElementById("deleteEventModal");
 const eventTitleInput = document.getElementById("event-title");
 const newEventModal = document.getElementById("modal");
 const calendar = document.getElementById("calendar");
-const eventForDay = events.find(e => e.date === clicked);
+//const eventForDay = events.find(e => e.date === clicked);
 const dt = new Date();
-
-
-
+document.getElementById("save-button").addEventListener("click", function () {
+  const title = document.getElementById("event-title").value;
+  // Add the new event to the events array
+  //events.push({ title: title, date: clicked });
+  // Store the updated events array in local storage
+  //localStorage.setItem("events", JSON.stringify(events));
+  // Make a POST request to the server's /events endpoint to create a new event in the database
+fetch('/events', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ title: title, date: clicked })
+})
+  .then(response => response.json())
+  .then(event => {
+    // If the request was successful, update the events array and local storage
+    events.push(event);
+    localStorage.setItem('events', JSON.stringify(events));
+})
+  .catch(error => {
+    console.error(error);
+});
+  // Close the modal
+  newEventModal.style.display = "none";
+  // Rerender the calendar
+  init();
+});
 
 function openModal(date){
-    clicked = date;
-    const eventForDay = events.find(e => e.date === clicked);
-  console.log(eventForDay);
-  if (eventForDay) {
-    if(newEventModal.style.display = "block"){
-      newEventModal.style.display = "none"
-    }
-    document.getElementById("eventText").innerText = eventForDay.title;
-    deleteEventModal.style.display = "block";
-  } else {
-    if(deleteEventModal.style.display = "block"){
-      deleteEventModal.style.display = "none"
-    }
-      newEventModal.style.display = "block";
-  }
-  }
-
+  clicked = date;
+  //const eventForDay = events.find(e => e.date === clicked);
+  // Make a GET request to the server's /events endpoint to retrieve a list of events from the database
+  fetch('/events', {
+method: 'GET'
+})
+.then(response => response.json())
+.then(events => {
+// Find the event for the clicked date in the list of events retrieved from the database
+const eventForDay = events.find(e => e.date === clicked);
+console.log(eventForDay);
+if (eventForDay) {
+if(newEventModal.style.display = "block"){
+newEventModal.style.display = "none"
+}
+document.getElementById("eventText").innerText = eventForDay.title;
+deleteEventModal.style.display = "block";
+} else {
+if(deleteEventModal.style.display = "block"){
+deleteEventModal.style.display = "none"
+}
+newEventModal.style.display = "block";
+}
+})
+.catch(error => {
+console.error(error);
+});
+}
 function init () {
+  const dt = new Date();  
+  fetch('/events', {
+    method: 'GET'
+  })
+  .then(response => response.json())
+  .then(events => {
+    // Update the calendar with the retrieved events
+    updateCalendar(events);
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+function updateCalendar(events) {
   const dt = new Date();  
   //date.setDate(1);
   if (nav !==0) {
@@ -38,7 +88,9 @@ function init () {
     dt.setMonth;
     dt.setDate(1);
     dt.setMonth(new Date().getMonth() + nav);
-}
+  }
+  
+  
 
 const day = dt.getDate();
 const month = dt.getMonth();
@@ -142,6 +194,7 @@ if(i = paddingDays + daysInMonth){
   }
 }
 }
+}
 
 
     
@@ -196,3 +249,24 @@ if(i = paddingDays + daysInMonth){
   }
 initButtons();
 init();
+fetch('/events', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(event)
+})
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      localStorage.setItem('events', JSON.stringify([...events, event]));
+      return event;
+    }
+  })
+  .then(event => {
+    // do something with the inserted event here
+  })
+  .catch(error => {
+    console.error(error);
+    localStorage.setItem('events', JSON.stringify([...events, event]));
+    // do something with the inserted event here
+  });
