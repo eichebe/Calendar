@@ -131,11 +131,7 @@ if(i = paddingDays + daysInMonth){
     calendar.appendChild(day);
   }
 }
-}
-
-
-
-    
+} 
     function closeModal() {
     
       newEventModal.style.display = "none";
@@ -145,8 +141,20 @@ if(i = paddingDays + daysInMonth){
       calendar.innerHTML = '';
       init();
   }
-  
   function saveEvent() {
+    if (eventTitleInput.value) {
+        events.push({
+            date: clicked,
+            title: eventTitleInput.value,
+        });
+
+    localStorage.setItem("events", JSON.stringify(events));
+    
+    closeModal();
+    
+  }
+}
+  /*function saveEvent() {
       if (eventTitleInput.value) {
         // Connect to the MongoDB server
         mongodb.MongoClient.connect('mongodb://localhost:27017', (error, client) => {
@@ -211,7 +219,7 @@ if(i = paddingDays + daysInMonth){
         closeModal();
       }
     }
-  
+  */
   function deleteEvent() {
       
       events = events.filter(e => e.date !== clicked);
