@@ -6,49 +6,12 @@ const deleteEventModal = document.getElementById("deleteEventModal");
 const eventTitleInput = document.getElementById("event-title");
 const newEventModal = document.getElementById("modal");
 const calendar = document.getElementById("calendar");
-//const eventForDay = events.find(e => e.date === clicked);
+const eventForDay = events.find(e => e.date === clicked);
 const dt = new Date();
-document.getElementById("save-button").addEventListener("click", function () {
-  const title = document.getElementById("event-title").value;
-  // Add the new event to the events array
-  //events.push({ title: title, date: clicked });
-  // Store the updated events array in local storage
-  //localStorage.setItem("events", JSON.stringify(events));
-  // Make a POST request to the server's /events endpoint to create a new event in the database
-fetch('/events', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ title: title, date: clicked })
-})
-  .then(response => response.json())
-  .then(event => {
-    // If the request was successful, update the events array and local storage
-    events.push(event);
-    localStorage.setItem('events', JSON.stringify(events));
-})
-  .catch(error => {
-    console.error(error);
-});
-  // Close the modal
-  newEventModal.style.display = "none";
-  // Rerender the calendar
-  init();
-});
 
 function openModal(date){
   clicked = date;
-  //const eventForDay = events.find(e => e.date === clicked);
-  // Make a GET request to the server's /events endpoint to retrieve a list of events from the database
-  fetch('/events', {
-method: 'GET'
-})
-.then(response => response.json())
-.then(events => {
-// Find the event for the clicked date in the list of events retrieved from the database
 const eventForDay = events.find(e => e.date === clicked);
-console.log(eventForDay);
 if (eventForDay) {
 if(newEventModal.style.display = "block"){
 newEventModal.style.display = "none"
@@ -60,38 +23,16 @@ if(deleteEventModal.style.display = "block"){
 deleteEventModal.style.display = "none"
 }
 newEventModal.style.display = "block";
-}
-})
-.catch(error => {
-console.error(error);
-});
-}
+}}
+
 function init () {
   const dt = new Date();  
-  fetch('/events', {
-    method: 'GET'
-  })
-  .then(response => response.json())
-  .then(events => {
-    // Update the calendar with the retrieved events
-    updateCalendar(events);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-function updateCalendar(events) {
-  const dt = new Date();  
-  //date.setDate(1);
   if (nav !==0) {
     //selection for Buttons Month + nav
     dt.setMonth;
     dt.setDate(1);
     dt.setMonth(new Date().getMonth() + nav);
   }
-  
-  
-
 const day = dt.getDate();
 const month = dt.getMonth();
 const year = dt.getFullYear();
@@ -127,11 +68,8 @@ const months = [
     "December",
     ];
     
-//const currentMonth = date.getMonth();
-//const currentYear = date.getFullYear();
 const lastDay = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
 const prevLastDay = new Date(dt.getFullYear(), dt.getMonth(), 0).getDate();
-//const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
 
@@ -194,7 +132,7 @@ if(i = paddingDays + daysInMonth){
   }
 }
 }
-}
+
 
 
     
@@ -210,17 +148,69 @@ if(i = paddingDays + daysInMonth){
   
   function saveEvent() {
       if (eventTitleInput.value) {
-          events.push({
-              date: clicked,
-              title: eventTitleInput.value,
+        // Connect to the MongoDB server
+        mongodb.MongoClient.connect('mongodb://localhost:27017', (error, client) => {
+          if (error) {
+            console.error(error);
+            return;
+          }
+    
+          // Check if the calendar database exists
+          client.db().admin().listDatabases((error, result) => {
+            if (error) {
+              console.error(error);
+              return;
+            }
+    
+            const databases = result.databases;
+            const calendarDbExists = databases.some(db => db.name === 'calendar');
+            if (calendarDbExists) {
+              // Insert the new event into the events collection in the calendar database
+              const db = client.db('calendar');
+              db.collection('events').insertOne({
+                title: eventTitleInput.value,
+                date: clicked
+              }, (error, result) => {
+                if (error) {
+                  console.error(error);
+                  return;
+                }
+    
+                // Update the events array and local storage with the inserted event
+                const event = result.ops[0];
+                events.push(event);
+                localStorage.setItem('events', JSON.stringify(events));
+    
+                // Make a GET request to the /events endpoint to retrieve
+                const xhr = new XMLHttpRequest();
+
+                xhr.onreadystatechange = function() {
+                  if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Update the calendar with the retrieved events
+                    const events = JSON.parse(xhr.responseText);
+                    updateCalendar(events);
+                  }
+                };
+    
+                xhr.open('GET', 'http://localhost:3000/events', true);
+                xhr.send();
+              });
+            } else {
+              // Add the new event to the events array
+              events.push({
+                title: eventTitleInput.value,
+                date: clicked
+              });
+    
+              // Store the updated events array in local storage
+              localStorage.setItem('events', JSON.stringify(events));
+            }
           });
-  
-      localStorage.setItem("events", JSON.stringify(events));
-      
-      closeModal();
-      
-  }
-  }
+        });
+    
+        closeModal();
+      }
+    }
   
   function deleteEvent() {
       
@@ -249,24 +239,3 @@ if(i = paddingDays + daysInMonth){
   }
 initButtons();
 init();
-fetch('/events', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(event)
-})
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      localStorage.setItem('events', JSON.stringify([...events, event]));
-      return event;
-    }
-  })
-  .then(event => {
-    // do something with the inserted event here
-  })
-  .catch(error => {
-    console.error(error);
-    localStorage.setItem('events', JSON.stringify([...events, event]));
-    // do something with the inserted event here
-  });
