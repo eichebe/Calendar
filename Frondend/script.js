@@ -1,3 +1,6 @@
+const server = require('../Backend/server.js');
+const db = server.db;
+const serverevents = await db.collection('events').find().toArray();
 let clicked = null;
 let nav = 0;
 let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
@@ -25,7 +28,8 @@ deleteEventModal.style.display = "none"
 newEventModal.style.display = "block";
 }}
 
-function init () {
+async function init () {
+  const events = await db.collection('events').find().toArray();
   const dt = new Date();  
   if (nav !==0) {
     //selection for Buttons Month + nav
@@ -141,91 +145,42 @@ if(i = paddingDays + daysInMonth){
       calendar.innerHTML = '';
       init();
   }
-  function saveEvent() {
-    if (eventTitleInput.value) {
-        events.push({
-            date: clicked,
-            title: eventTitleInput.value,
-        });
-
-    localStorage.setItem("events", JSON.stringify(events));
+  async function saveEvent() {
     
-    closeModal();
-    
-  }
-}
-  /*function saveEvent() {
+    // Get the event title and date
+    const title = eventTitleInput.value;
+    const date = clicked;
+  
+    try {
+      // Insert the event into the database
+      await db.collection('events').insertOne({ title, date });
+    } catch (error) {
+      console.error(error);
+      // If there is an error inserting the event into the database,
+      // save the event to local storage instead
       if (eventTitleInput.value) {
-        // Connect to the MongoDB server
-        mongodb.MongoClient.connect('mongodb://localhost:27017', (error, client) => {
-          if (error) {
-            console.error(error);
-            return;
-          }
-    
-          // Check if the calendar database exists
-          client.db().admin().listDatabases((error, result) => {
-            if (error) {
-              console.error(error);
-              return;
-            }
-    
-            const databases = result.databases;
-            const calendarDbExists = databases.some(db => db.name === 'calendar');
-            if (calendarDbExists) {
-              // Insert the new event into the events collection in the calendar database
-              const db = client.db('calendar');
-              db.collection('events').insertOne({
-                title: eventTitleInput.value,
-                date: clicked
-              }, (error, result) => {
-                if (error) {
-                  console.error(error);
-                  return;
-                }
-    
-                // Update the events array and local storage with the inserted event
-                const event = result.ops[0];
-                events.push(event);
-                localStorage.setItem('events', JSON.stringify(events));
-    
-                // Make a GET request to the /events endpoint to retrieve
-                const xhr = new XMLHttpRequest();
-
-                xhr.onreadystatechange = function() {
-                  if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Update the calendar with the retrieved events
-                    const events = JSON.parse(xhr.responseText);
-                    updateCalendar(events);
-                  }
-                };
-    
-                xhr.open('GET', 'http://localhost:3000/events', true);
-                xhr.send();
-              });
-            } else {
-              // Add the new event to the events array
-              events.push({
-                title: eventTitleInput.value,
-                date: clicked
-              });
-    
-              // Store the updated events array in local storage
-              localStorage.setItem('events', JSON.stringify(events));
-            }
-          });
+        events.push({
+          date: clicked,
+          title: eventTitleInput.value,
         });
-    
-        closeModal();
+  
+        localStorage.setItem("events", JSON.stringify(events));
       }
     }
-  */
-  function deleteEvent() {
-      
+  
+    closeModal();
+  }
+
+  async function deleteEvent() {
+    try {
+      // Remove the event from the database
+      await db.collection('events').deleteOne({ date: clicked });
+    } catch (error) {
+      // If there was an error accessing the database, use local storage as a fallback
       events = events.filter(e => e.date !== clicked);
-      
       localStorage.setItem("events", JSON.stringify(events));
-      closeModal();
+    }
+    closeModal();
   }
     function initButtons () {
       document.getElementById("nextMonth").addEventListener("click", () => {
