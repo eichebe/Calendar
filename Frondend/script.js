@@ -1,6 +1,3 @@
-const server = require('../Backend/server.js');
-const db = server.db;
-const serverevents = await db.collection('events').find().toArray();
 let clicked = null;
 let nav = 0;
 let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
