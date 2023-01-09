@@ -1,96 +1,88 @@
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const MongoClient = require('mongodb').MongoClient;
+const mongodb = require('mongodb');
 
 const hostname = '127.0.0.1'; // localhost
 const port = 3000;
-const externalDirectory = '../Frontend';
 
-const server = http.createServer((req, res) => {
-  // Set the response status and headers
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/html');
-const fileType = req.url.split('.')[1]; // get file extension
-const fileQuery = { filename: req.url }; // create query to find file in collection
+const url = 'mongodb://localhost:27017'; // für lokale MongoDB
+const mongoClient = new mongodb.MongoClient(url);
 
-MongoClient.connect(url, { useNewUrlParser: true }, (error, client) => {
-  if (error) {
-    console.error(error);
-    res.sendStatus(500);
-    return;
-  }
+const defaultItems = [{
+   date: 1/6/2023,
+   title: "drei König",
+}]
 
-  // Find the file in the database
-  const db = client.db(dbName);
-  const files = db.collection('files');
-  files.findOne(fileQuery, (error, file) => {
-    if (error) {
-      console.error(error);
-      res.sendStatus(500);
-      return;
+async function startServer() {
+    // connect to database
+    await mongoClient.connect();
+    // optional: defaultItems einfügen, wenn Collection noch nicht existiert
+    let collections = await mongoClient.db('calendar').listCollections().toArray();
+    if(!collections.find(collection => collection.name == 'event')){
+        mongoClient.db('calendar').collection('event').insertMany(defaultItems);
     }
-
-    // Send the file contents in the response
-    res.setHeader('Content-Type', `text/${fileType}`);
-    res.send(file.data);
-  });
-});
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-
-const MongoClient = require('mongodb').MongoClient;
-
-const url = 'mongodb://localhost:27017';
-const dbName = 'mydatabase';
-
-MongoClient.connect(url, { useNewUrlParser: true }, (error, client) => {
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const db = client.db(dbName);
-  // Now you can perform operations on the database
-});
-
-const files = db.collection('files');
-const frontendFiles = files.find({ type: 'frontend' }).toArray((error, result) => {
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  // result is an array of frontend files
-});
-app.get('/frontend/:filename', (req, res) => {
-  // Get the filename from the request parameters
-  const filename = req.params.filename;
-
-  // Connect to the MongoDB database
-  MongoClient.connect(url, { useNewUrlParser: true }, (error, client) => {
-    if (error) {
-      console.error(error);
-      res.sendStatus(500);
-      return;
-    }
-
-    // Find the file in the database
-    const db = client.db(dbName);
-    const files = db.collection('files');
-    files.findOne({ filename }, (error, file) => {
-      if (error) {
-        console.error(error);
-        res.sendStatus(500);
-        return;
-      }
-
-      // Send the file contents in the response
-      res.setHeader('Content-Type', file.contentType);
-      res.send(file.data);
+    // listen for requests
+    server.listen(port, hostname, () => {
+        console.log(`Server running at http://${hostname}:${port}/`);
     });
-  });
+}
+
+const server = http.createServer(async (request, response) => {
+  response.statusCode = 200;
+  response.setHeader('Content-Type', 'text/plain');
+  response.setHeader('Access-Control-Allow-Origin', '*'); // bei CORS Fehler
+  const url = new URL(request.url || '', `http://${request.headers.host}`);
+  const id = url.searchParams.get('id');
+  const itemCollection = mongoClient.db('calendar').collection('event');
+  switch (url.pathname) {
+    case '/getItems':
+        let items = await itemCollection.find({}).toArray();
+        //console.log("getItems", items)
+        response.write(JSON.stringify(items));
+        break;
+    case '/getItem':
+        if(id){
+            let items = await itemCollection.find({
+                _id: new mongodb.ObjectId(id), // von Zahl zu MongoDB ID Objekt konvertieren
+            }).toArray();
+            //console.log("getItem", items[0]);
+            response.write(JSON.stringify(items[0]));
+        }
+        break;
+    case '/setItem':
+        if(request.method === 'POST') {
+            let jsonString = '';
+            request.on('data', (data) => {
+                jsonString += data;
+            });
+            request.on('end', () => {
+                newItem = JSON.parse(jsonString);
+                if(newItem._id){ // update
+                    //console.log("update", newItem);
+                    newItem._id = mongodb.ObjectId(newItem._id); // von Zahl zu MongoDB ID Objekt konvertieren
+                    itemCollection.replaceOne({
+                        _id: newItem._id,
+                    },
+                    newItem);
+                }
+                else{ // add
+                    //console.log("insert", newItem);
+                    itemCollection.insertOne(newItem);
+                }
+            });
+        }
+    case '/removeItem':
+        //console.log("deleteItem", id);
+        if(id){
+            result = await itemCollection.deleteOne({
+                _id: new mongodb.ObjectId(id), // von Zahl zu MongoDB ID Objekt konvertieren
+            });
+        }
+        break;
+    default:
+        response.statusCode = 404;
+  }
+  response.end();
 });
+
+
+startServer();
