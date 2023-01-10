@@ -1,1 +1,1 @@
-C:\Database\zipInstall\bin\mongod.exe --dbpath Database\data\db
+\Database\zipInstall\bin\mongod.exe --dbpath Database\data\db

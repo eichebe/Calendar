@@ -1,16 +1,17 @@
 const http = require('http');
 const mongodb = require('mongodb');
 
-const hostname = '127.0.0.1'; // localhost
+const hostname = '127.0.0.1'; 
 const port = 3000;
 
-const url = 'mongodb://localhost:27017'; // für lokale MongoDB
+const url = 'mongodb://127.0.0.1:27017';
 const mongoClient = new mongodb.MongoClient(url);
 
 const defaultItems = [{
    date: 1/6/2023,
    title: "drei König",
 }]
+
 
 async function startServer() {
     // connect to database
@@ -21,9 +22,14 @@ async function startServer() {
         mongoClient.db('calendar').collection('event').insertMany(defaultItems);
     }
     // listen for requests
-    server.listen(port, hostname, () => {
+    if(mongoClient.connect) {
+        server.listen(port, hostname, () => {
         console.log(`Server running at http://${hostname}:${port}/`);
+            
     });
+        } else {
+            console.log('Database not found')
+        }
 }
 
 const server = http.createServer(async (request, response) => {
@@ -42,9 +48,8 @@ const server = http.createServer(async (request, response) => {
     case '/getItem':
         if(id){
             let items = await itemCollection.find({
-                _id: new mongodb.ObjectId(id), // von Zahl zu MongoDB ID Objekt konvertieren
+                _id: new mongodb.ObjectId(id),
             }).toArray();
-            //console.log("getItem", items[0]);
             response.write(JSON.stringify(items[0]));
         }
         break;

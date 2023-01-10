@@ -116,7 +116,7 @@ if(i = paddingDays + daysInMonth){
       calendar.innerHTML = '';
       init();
   }
-  async function saveEvent() {
+  /*async function saveEvent() {
     console.log(clicked);
     // Get the event title and date
       if (eventTitleInput.value) {
@@ -130,17 +130,40 @@ if(i = paddingDays + daysInMonth){
     
   
     closeModal();
+  }*/
+  
+  async function saveEvent() {
+    console.log(clicked);
+    // Get the event title and date
+    if (eventTitleInput.value) {
+      let newEvent = {
+        date: clicked,
+        title: eventTitleInput.value,
+      };
+      try {
+        // send the event to the server
+        let response = await fetch("http://localhost:3000/setItem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newEvent)
+        });
+        if (response.ok) {
+          console.log("Event saved to the database");
+        } else {
+          console.log("Error: ", response.statusText);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    closeModal();
   }
 
   async function deleteEvent() {
-    /*try {
-      // Remove the event from the database
-      await db.collection('events').deleteOne({ date: clicked });
-    } catch (error) {*/
-      // If there was an error accessing the database, use local storage as a fallback
       events = events.filter(e => e.date !== clicked);
       localStorage.setItem("events", JSON.stringify(events));
-    //}
     closeModal();
   }
     function initButtons () {
