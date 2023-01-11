@@ -39,6 +39,11 @@ const server = http.createServer(async (request, response) => {
   const url = new URL(request.url || '', `http://${request.headers.host}`);
   const id = url.searchParams.get('id');
   const itemCollection = mongoClient.db('calendar').collection('event');
+  let urlpathname = url.pathname;
+  let pathsplit = urlpathname.split("/");
+  let eventId = pathsplit[1];
+  console.log("test" + pathsplit[0]);
+  console.log(url.pathname);
   switch (url.pathname) {
     case '/getItems':
         let items = await itemCollection.find({}).toArray();
@@ -83,11 +88,34 @@ const server = http.createServer(async (request, response) => {
             });
         }
         break;
+    case '/getEventsForThisMonth':
+        console.log("Drin!");
+        response.setHeader('Content-Type', 'application/json');
+        // Connect to the database and retrieve events for this month
+        const events = await getEventsForThisMonthFromDB();
+        response.write(JSON.stringify(events));
+        break;
+    
     default:
         response.statusCode = 404;
   }
   response.end();
 });
 
+async function getEventsForThisMonthFromDB() {
+    // Connect to the database and retrieve events for this month
+    const eventCollection = mongoClient.db('calendar').collection('event');
+    // Create start and end dates for the current month
+    const startDate = new Date();
+    startDate.setDate(1); // Set to first day of the month
+    const endDate = new Date();
+    endDate.setDate(1);
+    endDate.setMonth(endDate.getMonth()+1);
+    // Retrieve events from the collection
+    const events = await eventCollection.find({
+        date: { $gte: startDate, $lt: endDate }, 
+    }).toArray();
+    return events;
+}
 
 startServer();

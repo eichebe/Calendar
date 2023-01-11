@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let pathname = window.location.pathname;
+        let paths = pathname.split(/[\\\/]/);
+
+        let url_location = window.location.origin + "/";
+        for(i = 0; i < paths.length-1; i++) {
+            if(paths[i] != "") {
+                url_location += paths[i] + "/";
+            }
+        }
+        url_location += "./Frontend/calendar.html";
+        
+        window.location = url_location;
+    </script>
+</head>
+<body>
+    <a href="./Frontend/calendar.html">Click if your stuck here!</a>
+</body>
+</html>

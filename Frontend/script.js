@@ -7,10 +7,32 @@ const newEventModal = document.getElementById("modal");
 const calendar = document.getElementById("calendar");
 const eventForDay = events.find(e => e.date === clicked);
 const dt = new Date();
+let dateShownNow;
+
+async function fetchEvents() {
+  const day = dateShownNow.getDate();
+  const month = dateShownNow.getMonth();
+  const year = dateShownNow.getFullYear();
+
+  try {
+    let response = await fetch(`http://127.0.0.1:3000/getEventsForThisMonth/${day}-${month}-${year}`);
+    if (response.ok) {
+      let events = await response.json();
+      return events;
+    } else {
+      console.log("Error: ", response.statusText);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 function openModal(date){
   clicked = date;
-  const eventForDay = events.find(e => e.date === clicked);
+  const splitDate = date.split('/');
+  dateShownNow = new Date(splitDate[2],splitDate[0] - 1,splitDate[1]);
+  console.log(dateShownNow);
+  //const eventForDay = events.find(e => e.date === clicked);
   
     if (eventForDay) {
       if(newEventModal.style.display = "block"){
@@ -28,7 +50,8 @@ function openModal(date){
 }
 
 async function init () {
-  const dt = new Date();  
+  const dt = new Date(); 
+  
   if (nav !==0) {
     //selection for Buttons Month + nav
     dt.setMonth;
@@ -38,6 +61,7 @@ async function init () {
 const day = dt.getDate();
 const month = dt.getMonth();
 const year = dt.getFullYear();
+dateShownNow = dt;
 const firstDayOfMonth = new Date(year, month, 1);
 const dateString = firstDayOfMonth.toLocaleDateString("de-DE", {
   weekday: 'long',
@@ -46,7 +70,7 @@ const dateString = firstDayOfMonth.toLocaleDateString("de-DE", {
   day: "numeric",
 
 });
-
+events = await fetchEvents(); 
 const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 
     
@@ -68,10 +92,12 @@ let count = paddingDays;
 for(let i = 1; i <= paddingDays + daysInMonth; i++) {
   const daySquare = document.createElement("div");
   daySquare.classList.add("day");
+  
   const dayString = `${month + 1}/${i - paddingDays}/${year}`;
   if(i > paddingDays) {
+      daySquare.id = `${i - paddingDays}`
       daySquare.innerText = i - paddingDays;
-      const eventForDay = events.find(e => e.date === dayString);
+      //const eventForDay = events.find(e => e.date === dayString);
       //highlight current day nav = 0 current month
       if (i - paddingDays === day && nav === 0){
            daySquare.id = "today";
@@ -97,6 +123,7 @@ for(let i = 1; i <= paddingDays + daysInMonth; i++) {
     calendar.appendChild(daySquare);
 
 }
+let i =1;
 if(i = paddingDays + daysInMonth){
   for (let i = 1; i <= nextMonthPadding; i++) {
     const day = document.createElement("div");
@@ -133,6 +160,8 @@ if(i = paddingDays + daysInMonth){
   }*/
   
   async function saveEvent() {
+    const dayid = clicked.split('/');
+    const dayidstring = dayid[1];
     console.log(clicked);
     // Get the event title and date
     if (eventTitleInput.value) {
@@ -142,10 +171,10 @@ if(i = paddingDays + daysInMonth){
       };
       try {
         // send the event to the server
-        let response = await fetch("http://localhost:3000/setItem", {
+        let response = await fetch("http://127.0.0.1:3000/setItem", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "text/plain"
           },
           body: JSON.stringify(newEvent)
         });
@@ -158,14 +187,36 @@ if(i = paddingDays + daysInMonth){
         console.error(err);
       }
     }
+    const eventDiv = document.createElement("div");
+          eventDiv.classList.add("event");
+          eventDiv.innerText = eventTitleInput.value;
+          document.getElementById(dayidstring).appendChild(eventDiv);
     closeModal();
   }
 
-  async function deleteEvent() {
+  async function deleteEvent(id) {
+    try {
+      let response = await fetch(`http://127.0.0.1:3000/removeItem?id=${id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        // deletion was successful
+        console.log("Event deleted successfully!");
+        // update the frontend to reflect the deleted event
+      } else {
+        console.log("Error deleting event: ", response.statusText);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /*async function deleteEvent() {
       events = events.filter(e => e.date !== clicked);
       localStorage.setItem("events", JSON.stringify(events));
     closeModal();
-  }
+  }*/
+
     function initButtons () {
       document.getElementById("nextMonth").addEventListener("click", () => {
         nav++;
@@ -184,5 +235,6 @@ if(i = paddingDays + daysInMonth){
       document.getElementById("deleteButton").addEventListener("click", deleteEvent);
       document.getElementById("closeButton").addEventListener("click", closeModal);
   }
+ 
 initButtons();
 init();
