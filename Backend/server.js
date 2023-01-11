@@ -39,12 +39,13 @@ const server = http.createServer(async (request, response) => {
   const url = new URL(request.url || '', `http://${request.headers.host}`);
   const id = url.searchParams.get('id');
   const itemCollection = mongoClient.db('calendar').collection('event');
-  let urlpathname = url.pathname;
+  let urlpathname = url.pathname.toString();
   let pathsplit = urlpathname.split("/");
-  let eventId = pathsplit[1];
-  console.log("test" + pathsplit[0]);
+  let eventId = pathsplit[2];
+  let pathurl = pathsplit[1];
+  console.log("test" + pathsplit);
   console.log(url.pathname);
-  switch (url.pathname) {
+  switch ("/" + pathurl) {
     case '/getItems':
         let items = await itemCollection.find({}).toArray();
         //console.log("getItems", items)
