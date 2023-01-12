@@ -43,7 +43,7 @@ const server = http.createServer(async (request, response) => {
   let pathsplit = urlpathname.split("/");
   let eventId = pathsplit[2] + "/" + pathsplit[3] + "/" + pathsplit[4];
   let pathurl = pathsplit[1];
-  console.log("test" + pathsplit);
+  console.log("test" + eventId);
   console.log(url.pathname);
   switch ("/" + pathurl) {
     case '/getItems':
@@ -51,13 +51,22 @@ const server = http.createServer(async (request, response) => {
         //console.log("getItems", items)
         response.write(JSON.stringify(items));
         break;
-    case '/getItem':
-        if(id){
-            let items = await itemCollection.find({
-                _id: new mongodb.ObjectId(id),
-            }).toArray();
-            response.write(JSON.stringify(items[0]));
-        }
+        case '/getEvent':
+            console.log('here');
+            if(eventId){
+                console.log('there');
+                let event = await itemCollection.find({
+                    date: eventId,
+                }).toArray();
+                if(event.length >= 1){
+                    console.log('bad');
+                    response.statusCode = 200;
+                }else{
+                    console.log('good');
+                    response.statusCode = 404;
+                    
+                }
+            }
         break;
     case '/setItem':
         if(request.method === 'POST') {
@@ -81,13 +90,12 @@ const server = http.createServer(async (request, response) => {
                 }
             });
         }
-    case '/removeItem':
-        //console.log("deleteItem", id);
-        if(id){
-            result = await itemCollection.deleteOne({
-                _id: new mongodb.ObjectId(id), // von Zahl zu MongoDB ID Objekt konvertieren
-            });
-        }
+        case '/removeItem':
+            if(eventId){
+                result = await itemCollection.deleteOne({
+                    date: eventId,
+                });
+            }
         break;
     case '/getEventsForThisMonth':
         console.log("Drin!");

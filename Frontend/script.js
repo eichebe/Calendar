@@ -1,14 +1,16 @@
 let clicked = null;
 let nav = 0;
 let events = [];
+let datesplit;
 //let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 const deleteEventModal = document.getElementById("deleteEventModal");
 const eventTitleInput = document.getElementById("event-title");
 const newEventModal = document.getElementById("modal");
 const calendar = document.getElementById("calendar");
-const eventForDay = events.find(e => e.date === clicked);
+//const eventForDay = events.find(e => e.date === clicked);
 const dt = new Date();
 let dateShownNow;
+let datenow;
 
 async function fetchEvents() {
   const day = dateShownNow.getDate();
@@ -43,7 +45,36 @@ async function fetchEvents() {
   }
 }
 
-function openModal(date){
+async function openModal(date){
+  clicked = date;
+  const splitDate = date.split('/');
+  dateShownNow = new Date(splitDate[2],splitDate[0] - 1,splitDate[1]);
+  console.log(dateShownNow);
+  // Make the API call to fetch the event for the selected date
+  let response = await fetch(`http://127.0.0.1:3000/getEvent/${clicked}`);
+  console.log(response);
+  // Check the status code of the response
+  if (response.status === 200) {
+    // If the status code is 200, it means the event exists
+    let event = await response.json();
+    document.getElementById("eventText").innerText = event.title;
+    if(newEventModal.style.display == "block"){
+      newEventModal.style.display = "none"
+      }
+      deleteEventModal.style.display = "block";
+  } else if (response.status === 404) {
+    // If the status code is 404, it means the event does not exist
+    if(deleteEventModal.style.display == "block"){
+      deleteEventModal.style.display = "none"
+      }
+    newEventModal.style.display = "block";
+  } else {
+    // Handle any other status codes as appropriate
+    console.log("Error: ", response.statusText);
+  }
+}
+
+/*function openModal(date){
   clicked = date;
   const splitDate = date.split('/');
   dateShownNow = new Date(splitDate[2],splitDate[0] - 1,splitDate[1]);
@@ -63,7 +94,7 @@ function openModal(date){
         }
         newEventModal.style.display = "block";
     }
-}
+}*/
 
 async function init () {
   const dt = new Date(); 
@@ -120,18 +151,20 @@ for(let i = 1; i <= paddingDays + daysInMonth; i++) {
       //highlight current day nav = 0 current month
       if (i - paddingDays === day && nav === 0){
           daySquare.classList.add("today");
+          datenow = dayString; 
           daySquare.id = `${i - paddingDays}`;
       }
       
       
       count += daysInMonth;
        
-      if (eventForDay) {  
+      /*if (eventForDay) {  
         const eventDiv = document.createElement("div");
           eventDiv.classList.add("event");
           eventDiv.innerText = eventForDay.title;
           daySquare.appendChild(eventDiv);
-      }
+      }*/
+      console.log(dayString);
       daySquare.addEventListener("click", () => openModal(dayString));
   }else{
     daySquare.innerText = prevLastDay - count + 1;  
@@ -216,11 +249,12 @@ events = await fetchEvents();
     closeModal();
   }
 
-  async function deleteEvent(id) {
+  async function deleteEvent() {
+    const month =  datesplit[0];
+    const day = datesplit[1];
+    const year = datesplit[2];
     try {
-      let response = await fetch(`http://127.0.0.1:3000/removeItem?id=${id}`, {
-        method: 'DELETE'
-      });
+      let response = await fetch(`http://127.0.0.1:3000/removeItem/${month}/${day}/${year}`);
       if (response.ok) {
         // deletion was successful
         console.log("Event deleted successfully!");
@@ -231,6 +265,7 @@ events = await fetchEvents();
     } catch (err) {
       console.error(err);
     }
+    closeModal();
   }
 
   /*async function deleteEvent() {
