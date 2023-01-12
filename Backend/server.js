@@ -41,7 +41,7 @@ const server = http.createServer(async (request, response) => {
   const itemCollection = mongoClient.db('calendar').collection('event');
   let urlpathname = url.pathname.toString();
   let pathsplit = urlpathname.split("/");
-  let eventId = pathsplit[2];
+  let eventId = pathsplit[2] + "/" + pathsplit[3] + "/" + pathsplit[4];
   let pathurl = pathsplit[1];
   console.log("test" + pathsplit);
   console.log(url.pathname);
@@ -93,7 +93,7 @@ const server = http.createServer(async (request, response) => {
         console.log("Drin!");
         response.setHeader('Content-Type', 'application/json');
         // Connect to the database and retrieve events for this month
-        const events = await getEventsForThisMonthFromDB();
+        const events = await getEventsForThisMonthFromDB(eventId);
         response.write(JSON.stringify(events));
         break;
     
@@ -103,18 +103,33 @@ const server = http.createServer(async (request, response) => {
   response.end();
 });
 
-async function getEventsForThisMonthFromDB() {
+async function getEventsForThisMonthFromDB(eventId) {
+    
     // Connect to the database and retrieve events for this month
     const eventCollection = mongoClient.db('calendar').collection('event');
+
+    // Extract month and year from the eventId
+    const dateParts = eventId.split("/");
+    const month = dateParts[0];
+    const year = dateParts[2];
     // Create start and end dates for the current month
-    const startDate = new Date();
-    startDate.setDate(1); // Set to first day of the month
-    const endDate = new Date();
-    endDate.setDate(1);
-    endDate.setMonth(endDate.getMonth()+1);
+    const startDate = new Date(year, month-1, 1);
+    const startDateFormatted = startDate.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+    });
+    const endDate = new Date(year, month, 1);
+    const endDateFormatted = endDate.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+    });
+    console.log(startDateFormatted);
+    console.log(endDateFormatted);
     // Retrieve events from the collection
     const events = await eventCollection.find({
-        date: { $gte: startDate, $lt: endDate }, 
+        date: { $gte: startDateFormatted, $lt: endDateFormatted }, 
     }).toArray();
     return events;
 }

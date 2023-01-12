@@ -1,6 +1,7 @@
 let clicked = null;
 let nav = 0;
-let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
+let events = [];
+//let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 const deleteEventModal = document.getElementById("deleteEventModal");
 const eventTitleInput = document.getElementById("event-title");
 const newEventModal = document.getElementById("modal");
@@ -11,13 +12,28 @@ let dateShownNow;
 
 async function fetchEvents() {
   const day = dateShownNow.getDate();
-  const month = dateShownNow.getMonth();
+  const month = dateShownNow.getMonth() + 1;
   const year = dateShownNow.getFullYear();
 
   try {
-    let response = await fetch(`http://127.0.0.1:3000/getEventsForThisMonth/${day}-${month}-${year}`);
+    let response = await fetch(`http://127.0.0.1:3000/getEventsForThisMonth/${month}/${day}/${year}`);
     if (response.ok) {
       let events = await response.json();
+      for (let i = 0; i < events.length; i++) {
+        let event = events[i];
+        let eventDay = event.date;
+        let eventSplit = eventDay.split('/');
+        let eventDate = new Date(event.date);
+        if (eventDate.getMonth() === dateShownNow.getMonth() && eventDate.getFullYear() === dateShownNow.getFullYear()) {
+          const eventDiv = document.createElement("div");
+          eventDiv.classList.add("event");
+          eventDiv.innerText = event.title;
+          console.log(eventSplit[1]);
+          let dayElement = document.getElementById(`${eventSplit[1]}`);
+          dayElement.appendChild(eventDiv);
+          
+        }
+      }
       return events;
     } else {
       console.log("Error: ", response.statusText);
@@ -70,7 +86,8 @@ const dateString = firstDayOfMonth.toLocaleDateString("de-DE", {
   day: "numeric",
 
 });
-events = await fetchEvents(); 
+
+
 const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 
     
@@ -92,7 +109,9 @@ let count = paddingDays;
 for(let i = 1; i <= paddingDays + daysInMonth; i++) {
   const daySquare = document.createElement("div");
   daySquare.classList.add("day");
-  
+  daySquare.addEventListener('click', function() {
+    daySquare.classList.add('clicked');
+    });
   const dayString = `${month + 1}/${i - paddingDays}/${year}`;
   if(i > paddingDays) {
       daySquare.id = `${i - paddingDays}`
@@ -100,11 +119,13 @@ for(let i = 1; i <= paddingDays + daysInMonth; i++) {
       //const eventForDay = events.find(e => e.date === dayString);
       //highlight current day nav = 0 current month
       if (i - paddingDays === day && nav === 0){
-           daySquare.id = "today";
+          daySquare.classList.add("today");
+          daySquare.id = `${i - paddingDays}`;
       }
       
       
       count += daysInMonth;
+       
       if (eventForDay) {  
         const eventDiv = document.createElement("div");
           eventDiv.classList.add("event");
@@ -133,6 +154,7 @@ if(i = paddingDays + daysInMonth){
     calendar.appendChild(day);
   }
 }
+events = await fetchEvents();
 } 
     function closeModal() {
     
@@ -229,6 +251,7 @@ if(i = paddingDays + daysInMonth){
         calendar.innerHTML = '';
         init();
     });
+      
       document.getElementById("save-button").addEventListener("click", saveEvent);
       document.getElementById("cancel-button").addEventListener("click", closeModal);
   

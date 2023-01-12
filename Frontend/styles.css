@@ -105,7 +105,9 @@ html {
   padding: 5px;
 }
 
-
+.clicked {
+  border: 0.2rem solid #777;
+}
 
 .days div:hover{
   background-color: #262626;
@@ -123,7 +125,7 @@ html {
   opacity: 0.3;
 }
 
-#today {
+.day.today{
   background-color: #167e56;
 }
 .modal{
