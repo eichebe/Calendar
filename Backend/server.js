@@ -8,9 +8,9 @@ const url = 'mongodb://127.0.0.1:27017';
 const mongoClient = new mongodb.MongoClient(url);
 
 const defaultItems = [{
-   date: 1/6/2023,
+   date: "1/6/2023",
    title: "drei König",
-}]
+}];
 
 
 async function startServer() {
@@ -57,9 +57,11 @@ const server = http.createServer(async (request, response) => {
                 console.log('there');
                 let event = await itemCollection.find({
                     date: eventId,
+                },{
                 }).toArray();
                 if(event.length >= 1){
                     console.log('bad');
+                    response.write(JSON.stringify(event));
                     response.statusCode = 200;
                 }else{
                     console.log('good');

@@ -16,39 +16,49 @@ async function fetchEvents() {
   const day = dateShownNow.getDate();
   const month = dateShownNow.getMonth() + 1;
   const year = dateShownNow.getFullYear();
-
-  try {
+  try 
+  {
     let response = await fetch(`http://127.0.0.1:3000/getEventsForThisMonth/${month}/${day}/${year}`);
     if (response.ok) {
       let events = await response.json();
-      for (let i = 0; i < events.length; i++) {
+      for (let i = 0; i < events.length; i++) 
+      {
         let event = events[i];
         let eventDay = event.date;
         let eventSplit = eventDay.split('/');
         let eventDate = new Date(event.date);
-        if (eventDate.getMonth() === dateShownNow.getMonth() && eventDate.getFullYear() === dateShownNow.getFullYear()) {
+        if (eventDate.getMonth() === dateShownNow.getMonth() && eventSplit[2] == year) 
+        {
           const eventDiv = document.createElement("div");
           eventDiv.classList.add("event");
           eventDiv.innerText = event.title;
           console.log(eventSplit[1]);
           let dayElement = document.getElementById(`${eventSplit[1]}`);
-          dayElement.appendChild(eventDiv);
-          
+          if(dayElement) dayElement.appendChild(eventDiv);
         }
       }
-      return events;
-    } else {
-      console.log("Error: ", response.statusText);
-    }
-  } catch (err) {
-    console.error(err);
-  }
+          return events;
+          } else {
+          console.log("Error: ", response.statusText);
+          }
+    } catch (err) 
+          {
+          console.error(err);
+          }
 }
 
 async function openModal(date){
   clicked = date;
+  console.log('clicked' + clicked);
   const splitDate = date.split('/');
-  dateShownNow = new Date(splitDate[2],splitDate[0] - 1,splitDate[1]);
+  datesplit = splitDate;
+  let month = dateShownNow.getMonth() + 1;
+  if (month - nav < 1) {
+    month = 12 + (month - nav);
+  } else {
+    month -= nav;
+  }
+  dateShownNow = new Date(splitDate[2], month  - 1, splitDate[1]);
   console.log(dateShownNow);
   // Make the API call to fetch the event for the selected date
   let response = await fetch(`http://127.0.0.1:3000/getEvent/${clicked}`);
@@ -57,7 +67,8 @@ async function openModal(date){
   if (response.status === 200) {
     // If the status code is 200, it means the event exists
     let event = await response.json();
-    document.getElementById("eventText").innerText = event.title;
+    let eventTitle = event[0].title;
+    document.getElementById("eventText").innerText = eventTitle;
     if(newEventModal.style.display == "block"){
       newEventModal.style.display = "none"
       }
@@ -164,7 +175,7 @@ for(let i = 1; i <= paddingDays + daysInMonth; i++) {
           eventDiv.innerText = eventForDay.title;
           daySquare.appendChild(eventDiv);
       }*/
-      console.log(dayString);
+      //console.log(dayString);
       daySquare.addEventListener("click", () => openModal(dayString));
   }else{
     daySquare.innerText = prevLastDay - count + 1;  
@@ -296,3 +307,4 @@ events = await fetchEvents();
  
 initButtons();
 init();
+fetchEvents();
